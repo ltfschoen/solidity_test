@@ -25,6 +25,7 @@ contract('SubCurrency', function(accounts) {
   let balanceUser1 = null;
   let balanceUser2 = null;
   let eventForSent = false;
+  let eventListenerReceived = false;
 
   // // https://github.com/ethereumjs/testrpc
   // let accountConfig = {
@@ -58,7 +59,7 @@ contract('SubCurrency', function(accounts) {
   // TestRPC used as Web3 Provider
   web3.setProvider(provider);
 
-  log(`Ether conversion: 1 Ether is ${web3.toWei(1, "ether")} Wei`);
+  console.log(`Ether conversion: 1 Ether is ${web3.toWei(1, "ether")} Wei`);
 
   // Asynchronously load the user accounts that were created on TestRPC
   // by running `bash testrpc.sh`
@@ -68,13 +69,17 @@ contract('SubCurrency', function(accounts) {
 
       user1 = accounts[0];
       user2 = accounts[1];
-      log("Accounts: ", accs);
+      console.log("Accounts: ", accs);
 
       done(err);
     });
   });
 
-  log("Web3 provider connected: ", provider.isConnected());
+  console.log("Web3 provider connected: ", provider.isConnected());
+
+  after(function(done){
+    done();
+  });
 
   before(function(done){
     SubCurrency.setProvider(provider);
@@ -84,6 +89,17 @@ contract('SubCurrency', function(accounts) {
       .then(function(instance) {
         console.log("Previously Deployed Contract Abstraction Instance Address: ", instance.address);
         existingSubCurrencyInstance = instance;
+
+        // Event Listener "blockchain explorer" to track coin transactions and balances
+        existingSubCurrencyInstance.SentSubCurrency().watch(function(error, result) {
+          if (!error) {
+            eventListenerReceived = true;
+            console.log("SubCurrency transfer: " + result.args.amount +
+              " coins were sent from " + result.args.from +
+              " to " + result.args.to + ".");
+          }
+        });
+
         return existingSubCurrencyInstance.getBalance.call(user1);
       })
       .then(function(balance) {
@@ -108,7 +124,7 @@ contract('SubCurrency', function(accounts) {
       .then(function(transaction) {
         // "EVENT"
         //   - Reference: http://truffleframework.com/docs/getting_started/contracts
-        log("Transaction successfully processed");
+        console.log("Transaction successfully processed");
 
         // console.log("Resultant Transaction: ", transaction);
 
@@ -207,8 +223,12 @@ contract('SubCurrency', function(accounts) {
     expect(initialBalanceUser2 + amountToTransfer).to.be.equal(balanceUser2);
   });
 
-  it("should trigger Sent event when send coins between accounts", function() {
+  it("should trigger SentSubCurrency event when send coins between accounts", function() {
     expect(eventForSent).to.be.equal(true);
+  });
+
+  it("event listener watching event SentSubCurrency should be triggered when send coins between accounts", function() {
+    expect(eventListenerReceived).to.be.equal(true);
   });
 
   it("creates Newly Deployed Contract Abstraction with different address to that Previously Deployed", function() {
