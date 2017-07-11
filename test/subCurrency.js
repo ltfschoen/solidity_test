@@ -24,6 +24,7 @@ contract('SubCurrency', function(accounts) {
   let initialBalanceUser2 = null;
   let balanceUser1 = null;
   let balanceUser2 = null;
+  let eventSentSubCurrency = null;
   let eventForSent = false;
   let eventListenerReceived = false;
 
@@ -90,8 +91,10 @@ contract('SubCurrency', function(accounts) {
         console.log("Previously Deployed Contract Abstraction Instance Address: ", instance.address);
         existingSubCurrencyInstance = instance;
 
+        eventSentSubCurrency = existingSubCurrencyInstance.SentSubCurrency();
+
         // Event Listener "blockchain explorer" to track coin transactions and balances
-        existingSubCurrencyInstance.SentSubCurrency().watch(function(error, result) {
+        eventSentSubCurrency.watch(function(error, result) {
           if (!error) {
             eventListenerReceived = true;
             console.log("SubCurrency transfer: " + result.args.amount +
@@ -229,6 +232,7 @@ contract('SubCurrency', function(accounts) {
 
   it("event listener watching event SentSubCurrency should be triggered when send coins between accounts", function() {
     expect(eventListenerReceived).to.be.equal(true);
+    eventSentSubCurrency.stopWatching();
   });
 
   it("creates Newly Deployed Contract Abstraction with different address to that Previously Deployed", function() {
