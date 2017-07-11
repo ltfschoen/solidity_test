@@ -17,6 +17,21 @@
     * Step 4: Tests: `truffle test` or `npm run test`
         * **IMPORTANT** - Ensure already launched TestRPC by running previous steps
 
+* Debugging
+    * Remix IDE Documentation - https://remix.readthedocs.io/en/latest/
+        * Remixd to access shared folder on local machine in Remix IDE - https://remix.readthedocs.io/en/latest/tutorial_remixd_filesystem.html
+        * Debugging Dapp using Remix, Geth, Mix - https://remix.readthedocs.io/en/latest/tutorial_mist.html
+    * Remix IDE - https://remix.ethereum.org/
+        * Debug Tutorial https://remix.readthedocs.io/en/latest/tutorial_debug.html
+            * Copy/paste .sol contract
+            * Click Contract > Environment > JavaScript VM
+            * Click Create
+            * Enter parameter values to pass to Contract methods and Run them (i.e. `set` value 10)
+            * Click Debugger
+                * Enter Block number (i.e. 10)
+                * Add Breakpoints
+                * Click Left/Right arrow to step through Transaction and inspect EVM property values
+
 * Documentation: http://truffleframework.com/docs
 
 * Solidity
