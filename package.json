@@ -30,6 +30,10 @@
   },
   "homepage": "https://github.com/ltfschoen/solidity_test#readme",
   "devDependencies": {
-    "chai": "^4.0.2"
+    "chai": "^4.0.2",
+    "ethereumjs-testrpc": "^4.0.1"
+  },
+  "dependencies": {
+    "web3": "^0.19.1"
   }
 }

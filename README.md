@@ -15,6 +15,7 @@
 			    * `curl -X POST --data '{"jsonrpc":"2.0","method":"net_version","params":[]}' http://localhost:8545`
     * Step 3: Compile, Migrate: `truffle compile --compile-all; truffle migrate --reset --network development;`
     * Step 4: Tests: `truffle test` or `npm run test`
+        * **IMPORTANT** - Ensure already launched TestRPC by running previous steps
 
 * Documentation: http://truffleframework.com/docs
 
