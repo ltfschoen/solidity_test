@@ -25,12 +25,12 @@ contract SubCurrency {
     //   `function balances(address _account) returns (uint) { return balances[_account]; }`
     mapping (address => uint) public balances;
 
-    // Declare "event" Sent that is fired in `send` function.
+    // Declare "event" called 'SentSubCurrency' that is fired in `send` function.
     // User interfaces and servers may listen for the "event" to fire
     // on the blockchain with minimal cost.
     // Listener receives arguments `from`, `to`, `amount` when "event" fired
     // to help track transactions
-    event Sent(address from, address to, uint amount);
+    event SentSubCurrency(address from, address to, uint amount);
 
     // Constructor run only when contract created
     function SubCurrency() {
@@ -44,11 +44,14 @@ contract SubCurrency {
         }
         balances[msg.sender] -= amount;
         balances[receiver] += amount;
-        Sent(msg.sender, receiver, amount);
+        SentSubCurrency(msg.sender, receiver, amount);
         return true;
     }
 
     function getBalance (address user) constant returns (uint balance) {
         return balances[user];
     }
+
+    // Fallback Function
+    function() {}
 }

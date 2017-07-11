@@ -16,7 +16,7 @@ const log = console.log;
 
 contract('SubCurrency', function(accounts) {
 
-  let subCurrencyInstance = null;
+  let existingSubCurrencyInstance = null;
   let user1 = null;
   let user2 = null;
   let amountToTransfer = 100;
@@ -24,6 +24,7 @@ contract('SubCurrency', function(accounts) {
   let initialBalanceUser2 = null;
   let balanceUser1 = null;
   let balanceUser2 = null;
+  let eventForSent = false;
 
   // // https://github.com/ethereumjs/testrpc
   // let accountConfig = {
@@ -77,10 +78,13 @@ contract('SubCurrency', function(accounts) {
 
   before(function(done){
     SubCurrency.setProvider(provider);
+
+    // Previously Deployed Contract Abstraction
     SubCurrency.deployed()
       .then(function(instance) {
-        subCurrencyInstance = instance;
-        return subCurrencyInstance.getBalance.call(user1);
+        console.log("Previously Deployed Contract Abstraction Instance Address: ", instance.address);
+        existingSubCurrencyInstance = instance;
+        return existingSubCurrencyInstance.getBalance.call(user1);
       })
       .then(function(balance) {
         initialBalanceUser1 = balance.toNumber();
@@ -88,7 +92,7 @@ contract('SubCurrency', function(accounts) {
         console.log("balanceUser1: ", balanceUser1);
       })
       .then(function() {
-        return subCurrencyInstance.getBalance.call(user2);
+        return existingSubCurrencyInstance.getBalance.call(user2);
       })
       .then(function(balance) {
         initialBalanceUser2 = balance.toNumber();
@@ -96,17 +100,46 @@ contract('SubCurrency', function(accounts) {
         console.log("balanceUser2: ", balanceUser2);
       })
       .then(function() {
-        return subCurrencyInstance.sendSubCurrency(accounts[1], amountToTransfer);
+        // "TRANSACTION"
+        //   - Note: Special 3rd parameter allows editing specific details about the transaction
+        //   - Reference: http://truffleframework.com/docs/getting_started/contracts
+        return existingSubCurrencyInstance.sendSubCurrency(accounts[1], amountToTransfer, {from: accounts[0]});
+      })
+      .then(function(transaction) {
+        // "EVENT"
+        //   - Reference: http://truffleframework.com/docs/getting_started/contracts
+        log("Transaction successfully processed");
+
+        // console.log("Resultant Transaction: ", transaction);
+
+        // transaction is an object with the following values:
+        //
+        // transaction.tx      => transaction hash, string
+        // transaction.logs    => array of decoded events that were triggered within this transaction
+        // transaction.receipt => transaction receipt object, which includes gas used
+
+        // Loop through result.logs to check if triggered the Transfer event.
+        for (let i = 0; i < transaction.logs.length; i++) {
+          let log = transaction.logs[i];
+
+          if (log.event == "SentSubCurrency") {
+            // Event found!
+            eventForSent = true;
+            break;
+          }
+        }
       })
       .then(function() {
-        return subCurrencyInstance.getBalance.call(user1);
+        // "CALL"
+        //   - Reference: http://truffleframework.com/docs/getting_started/contracts
+        return existingSubCurrencyInstance.getBalance.call(user1);
       })
       .then(function(balance) {
         balanceUser1 = balance.toNumber();
         console.log("balanceUser1: ", balanceUser1);
       })
       .then(function() {
-        return subCurrencyInstance.getBalance.call(user2);
+        return existingSubCurrencyInstance.getBalance.call(user2);
       })
       .then(function(balance) {
         balanceUser2 = balance.toNumber();
@@ -118,8 +151,51 @@ contract('SubCurrency', function(accounts) {
       .then(done);
   });
 
-  it("subCurrency instance should be deployed" , function(){
-    expect(subCurrencyInstance).to.not.equal(null);
+  let newSubCurrencyInstance = null;
+
+  before(function(done){
+
+    // Add New Contract Abstraction to the network
+    //   - http://truffleframework.com/docs/getting_started/contracts
+    SubCurrency.new()
+      .then(function(instance) {
+        newSubCurrencyInstance = instance;
+        console.log("Newly Deployed Contract Abstraction Instance Address: ", instance.address);
+        return newSubCurrencyInstance.getBalance.call(user1);
+      })
+      .then(function(balance) {
+        console.log("balanceUser1: ", balanceUser1);
+      })
+      .then(function() {
+        return newSubCurrencyInstance.getBalance.call(user2);
+      })
+      .then(function(balance) {
+        console.log("balanceUser2: ", balanceUser2);
+      })
+      // // NOT WORKING
+      // .then(function() {
+      //   // Send Ether directly to trigger Fallback Function
+      //   //   - References:
+      //   //     - https://github.com/trufflesuite/truffle-contract/blob/master/dist/truffle-contract.js
+      //   //     - https://github.com/ethereum/go-ethereum/wiki/Sending-ether
+      //   newSubCurrencyInstance.sendTransaction({from: user1, to: newSubCurrencyInstance.address, value: 100});
+      //   // newSubCurrencyInstance.send(web3.toWei(1, "ether"));
+      // })
+      // .then(function(transaction) {
+      //   console.log(transaction);
+      //   return newSubCurrencyInstance.getBalance.call(user1);
+      // })
+      // .then(function(balance) {
+      //   console.log("balanceUser1: ", balance);
+      // })
+      .catch(function(e){
+        console.log("Error: ", e);
+      })
+      .then(done);
+  });
+
+  it("Previously deployed subCurrency instance should exist" , function(){
+    expect(existingSubCurrencyInstance).to.not.equal(null);
   } );
 
   it("user1 should be coinbase" , function(){
@@ -131,4 +207,14 @@ contract('SubCurrency', function(accounts) {
     expect(initialBalanceUser2 + amountToTransfer).to.be.equal(balanceUser2);
   });
 
+  it("should trigger Sent event when send coins between accounts", function() {
+    expect(eventForSent).to.be.equal(true);
+  });
+
+  it("creates Newly Deployed Contract Abstraction with different address to that Previously Deployed", function() {
+    let previouslyDeployedContractAddress = SubCurrency.at(existingSubCurrencyInstance.address);
+    let newlyDeployedContractAddress = SubCurrency.at(newSubCurrencyInstance.address);
+
+    expect(newlyDeployedContractAddress).to.not.be.equal(previouslyDeployedContractAddress);
+  });
 });
