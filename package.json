@@ -1,0 +1,35 @@
+{
+  "name": "solidity_test",
+  "version": "1.0.0",
+  "description": "Solidity experiments",
+  "main": "truffle.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "truffle test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ltfschoen/solidity_test.git"
+  },
+  "keywords": [
+    "solidity",
+    "truffle",
+    "mocha",
+    "chai",
+    "nvm",
+    "testrpc",
+    "ethereum",
+    "blockchain"
+  ],
+  "author": "Luke Schoen",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ltfschoen/solidity_test/issues"
+  },
+  "homepage": "https://github.com/ltfschoen/solidity_test#readme",
+  "devDependencies": {
+    "chai": "^4.0.2"
+  }
+}

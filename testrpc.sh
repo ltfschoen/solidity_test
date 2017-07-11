@@ -20,8 +20,8 @@ mkdir db && mkdir db/chaindb
 # Create new tab to load the server and show logs.
 new_tab "Ethereum TestRPC Tab" \
         "echo 'Loading TestRPC...'" \
-        "cd ~/code/blockchain/solidity_test; testrpc --account='0x0000000000000000000000000000000000000000000000000000000000000001, 2471238800000000000' \
-                  --account='0x0000000000000000000000000000000000000000000000000000000000000002, 4471238800000000000' \
+        "cd ~/code/blockchain/solidity_test; testrpc --account='0x0000000000000000000000000000000000000000000000000000000000000001, 10002471238800000000000' \
+                  --account='0x0000000000000000000000000000000000000000000000000000000000000002, 10004471238800000000000' \
                   --unlock '0x0000000000000000000000000000000000000000000000000000000000000001' \
                   --unlock '0x0000000000000000000000000000000000000000000000000000000000000002' \
                   --blocktime 0 \
@@ -32,4 +32,4 @@ new_tab "Ethereum TestRPC Tab" \
                   --gasLimit 0x47E7C4 \
                   --debug true \
                   --mem true \
-                  --db './db/chaindatabase'"
+                  --db './db/chaindb'"

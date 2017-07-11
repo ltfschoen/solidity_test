@@ -1,3 +1,4 @@
 .idea/
 db/
 build/
+node_modules/

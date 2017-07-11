@@ -7,7 +7,6 @@ pragma solidity ^0.4.4;
  *  Functionality: Declare storeData as state variable of unsigned integer of 256 bits
  *    for storage in database. In Ethereum the owning Contract functions
  *    such as `get` and `set` are used to query and modify the database.
- *
  */
 contract SimpleStorage {
 
