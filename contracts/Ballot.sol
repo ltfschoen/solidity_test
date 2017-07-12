@@ -1,44 +1,40 @@
 pragma solidity ^0.4.11;
 
-/// @title Voting with delegation.
+/// @title Voting with delegation
 contract Ballot {
-    // This declares a new complex type which will
-    // be used for variables later.
-    // It will represent a single voter.
+    /// Declare to represent Single Voter
     struct Voter {
-    uint weight; // weight is accumulated by delegation
-    bool voted;  // if true, that person already voted
-    address delegate; // person delegated to
-    uint vote;   // index of the voted proposal
+        uint weight; // weight accumulated by delegation
+        bool voted;  // whether person already voted
+        address delegate; // person delegated to
+        uint vote;   // index of voted proposal
     }
 
-    // This is a type for a single proposal.
+    /// Declare to represent Single Proposal.
     struct Proposal {
-    bytes32 name;   // short name (up to 32 bytes)
-    uint voteCount; // number of accumulated votes
+        bytes32 name;   // short name (up to 32 bytes)
+        uint voteCount; // number of votes accumulated
     }
 
     address public chairperson;
 
-    // This declares a state variable that
-    // stores a `Voter` struct for each possible address.
+    /// Declare state variable to store `Voter` struct for each possible address.
+
+    // Iterate mapping: https://forum.ethereum.org/discussion/1995/iterating-mapping-types
     mapping(address => Voter) public voters;
 
-    // A dynamically-sized array of `Proposal` structs.
+    /// Dynamically-sized array of `Proposal` structs.
     Proposal[] public proposals;
 
-    /// Create a new ballot to choose one of `proposalNames`.
+    /// Create new Ballot to with:
+    //  - chairperson (originator) grante voting authority by changing `weight` to `1`
+    //  - proposals (comprising list of proposalNames/candidates) each with voteCount
     function Ballot(bytes32[] proposalNames) {
         chairperson = msg.sender;
         voters[chairperson].weight = 1;
 
-        // For each of the provided proposal names,
-        // create a new proposal object and add it
-        // to the end of the array.
+        // Iterate `proposalNames`, create New `Proposal` Object, append to `proposals` array
         for (uint i = 0; i < proposalNames.length; i++) {
-            // `Proposal({...})` creates a temporary
-            // Proposal object and `proposals.push(...)`
-            // appends it to the end of `proposals`.
             proposals.push(Proposal({
             name: proposalNames[i],
             voteCount: 0
@@ -46,79 +42,95 @@ contract Ballot {
         }
     }
 
-    // Give `voter` the right to vote on this ballot.
-    // May only be called by `chairperson`.
+    /// Grant Voter authority to vote on Ballot through call only from chairperson
+    //  - Grants Voter authority by changing `weight` to `1`
+    //  - Revert all changes to state and Ether balances if `require` evaluates to `false`
+    //  - WARNING: Currently `require` consumes all provided Gas
     function giveRightToVote(address voter) {
-        // If the argument of `require` evaluates to `false`,
-        // it terminates and reverts all changes to
-        // the state and to Ether balances. It is often
-        // a good idea to use this if functions are
-        // called incorrectly. But watch out, this
-        // will currently also consume all provided gas
-        // (this is planned to change in the future).
+        // `require` - http://solidity.readthedocs.io/en/develop/control-structures.html
         require((msg.sender == chairperson) && !voters[voter].voted && (voters[voter].weight == 0));
         voters[voter].weight = 1;
     }
 
-    /// Delegate your vote to the voter `to`.
+    /// Delegate Vote to voter with `to` address
+    //  - Delegator `sender` (reference) must not have previously voted
+    //  - Delegator must not delegate to themself (self-delegation)
     function delegate(address to) {
-        // assigns reference
+        // Pass by reference `voters[msg.sender]` to `sender`
         Voter sender = voters[msg.sender];
-        require(!sender.voted);
 
-        // Self-delegation is not allowed.
+        require(!sender.voted);
         require(to != msg.sender);
 
-        // Forward the delegation as long as
-        // `to` also delegated.
-        // In general, such loops are very dangerous,
-        // because if they run too long, they might
-        // need more gas than is available in a block.
-        // In this case, the delegation will not be executed,
-        // but in other situations, such loops might
-        // cause a contract to get "stuck" completely.
-        while (voters[to].delegate != address(0)) {
-            to = voters[to].delegate;
+        // // WARNING: Loops are dangerous since they may cause the Contract
+        // //   to get stuck or if they run too long more Gas than is available
+        // //   in the block may be required resulting in delegation being aborted.
+        // while (voters[to].delegate != address(0)) {
+        //    to = voters[to].delegate;
+        //    require(to != msg.sender);
+        //}
 
-            // We found a loop in the delegation, not allowed.
+        // - Forward the delegation by changing the delegate voter address `to`
+        //   to the sub-delegate only if the proposed delegate voter address (`to`)
+        //   already has an address set to its `delegate` property
+        //   (sub-delegate) and only if the sub-delegate address does not match
+        //   the `sender` address (avoids self-delegation through proposed delegate)
+        if (voters[to].delegate != address(0)) {
+            to = voters[to].delegate;
             require(to != msg.sender);
         }
 
-        // Since `sender` is a reference, this
-        // modifies `voters[msg.sender].voted`
+        // Delegator `sender` updated with:
+        // - `voted` property set `true` since defers vote to `delegate`
+        // - `delegate` property set to `to` address
+        //
+        // Delegate `to` address passed by reference to `delegate` (of Voter type) then
+        // - If `delegate` has already voted then add `voteCount` of the `Proposal` in list
+        //   of `proposals` with the `weight` (extent of voting influence) value of the Delegator
+        // - Else if `delegate` has not voted yet then assign the Delegator `sender` voting `weight`
+        //   to the `delegate` for use when they proceed to vote on behalf of the Delegator
+        //   (the Delegate may have a large `weight` if multiple Delegators deferred their `weight` to
+        //   allowing them to vote multiple times)
+
+        // Modify `voters[msg.sender].voted` since `sender` passed by reference
         sender.voted = true;
         sender.delegate = to;
         Voter delegate = voters[to];
         if (delegate.voted) {
-            // If the delegate already voted,
-            // directly add to the number of votes
             proposals[delegate.vote].voteCount += sender.weight;
         } else {
-            // If the delegate did not vote yet,
-            // add to her weight.
             delegate.weight += sender.weight;
         }
     }
 
-    /// Give your vote (including votes delegated to you)
-    /// to proposal `proposals[proposal].name`.
+    /// - Vote by a `Voter` from their `weight` (amount of times they may
+    //   vote, including votes delegated to them) toward a specific
+    //   `proposal` argument (`proposals[proposal].name`) associated with
+    //   a `Proposal` in the `proposals`
+    // - `sender` (Voter) must not have already voted
     function vote(uint proposal) {
         Voter sender = voters[msg.sender];
         require(!sender.voted);
+
+        // TODO: Add a `require` to verify that the given `proposal` argument
+        // is within the range of the `proposals` array, otherwise throw early
+        // (to avoid throwing later and having to revert all changes)
+
+        // TODO: If more than one Delegators (i.e. 2 voters) delegate their
+        //   voting weight to a specific Delegate voter, then as soon as that
+        //   Delegate votes, then their `voted` property is set `true` and then ALL of their
+        //   available weight is transferred to a SINGLE `proposal`, which
+        //   prevents them from spreading their available weight (voting power)
+        //   across multiple proposals that they may wish to support
         sender.voted = true;
         sender.vote = proposal;
-
-        // If `proposal` is out of the range of the array,
-        // this will throw automatically and revert all
-        // changes.
         proposals[proposal].voteCount += sender.weight;
     }
 
-    /// @dev Computes the winning proposal taking all
-    /// previous votes into account.
-    function winningProposal() constant
-    returns (uint winningProposal)
-    {
+    /// @dev Computes `winningProposal` accounting for all previous votes
+    //  - Reference:
+    //    - `constant` - https://ethereum.stackexchange.com/questions/13851/could-we-call-a-constant-function-without-spending-any-gas-inside-a-transaction/13855
+    function winningProposal() constant returns (uint winningProposal) {
         uint winningVoteCount = 0;
         for (uint p = 0; p < proposals.length; p++) {
             if (proposals[p].voteCount > winningVoteCount) {
@@ -128,12 +140,8 @@ contract Ballot {
         }
     }
 
-    // Calls winningProposal() function to get the index
-    // of the winner contained in the proposals array and then
-    // returns the name of the winner
-    function winnerName() constant
-    returns (bytes32 winnerName)
-    {
+    // Calls winningProposal() to get index of winner from `proposals` array then returns `winnerName`
+    function winnerName() constant returns (bytes32 winnerName) {
         winnerName = proposals[winningProposal()].name;
     }
 }
