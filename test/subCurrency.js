@@ -62,8 +62,7 @@ contract('SubCurrency', function(accounts) {
 
   console.log(`Ether conversion: 1 Ether is ${web3.toWei(1, "ether")} Wei`);
 
-  // Asynchronously load the user accounts that were created on TestRPC
-  // by running `bash testrpc.sh`
+  // Asynchronously load user accounts created on TestRPC by running `bash testrpc.sh`
   before(function(done) {
     web3.eth.getAccounts(function(err, accs) {
       accounts = accs;
