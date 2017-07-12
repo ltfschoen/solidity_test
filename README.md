@@ -157,3 +157,10 @@
 
 * Forums
     * https://forum.ethereum.org/
+
+* TODO
+    * http://solidity.readthedocs.io/en/develop/solidity-by-example.html#blind-auction
+    * https://truffle-box.github.io/
+    * https://github.com/trufflesuite/truffle-contract/blob/master/dist/truffle-contract.js
+    * https://github.com/trufflesuite/truffle-artifactor/blob/master/test/contracts.js
+    * https://github.com/Sergeon/ethereum-cashbox
