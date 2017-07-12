@@ -154,3 +154,6 @@
     * Definitions
         * [Cryptographic hash function (aka hashing)](https://en.wikipedia.org/wiki/Cryptographic_hash_function)
         * [Elliptic curve cryptography (ECC)](https://en.wikipedia.org/wiki/Elliptic_curve_cryptography)
+
+* Forums
+    * https://forum.ethereum.org/
