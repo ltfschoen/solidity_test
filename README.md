@@ -5,7 +5,7 @@
   		* [ethereumjs-testrpc](https://github.com/ethereumjs/testrpc)
   			* Note:
   				* 1 Wei == 	1000000000000000000 Ether
-  			* Run Bash Script `bash testrpc.sh`
+  			* Run Bash Script `bash testrpc.sh` (or manually open new terminal and copy/paste commands contained therein)
   			    * Deletes/create DB folder for Ethereum test blockchain
   			    * Loads Ethereum TestRPC Server and stores in DB folder.
   			    * Creates Account #1 with ~1337 Ether, and Account #2 with ~2674 Ether.
