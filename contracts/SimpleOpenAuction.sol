@@ -1,10 +1,10 @@
 pragma solidity ^0.4.11;
 
-contract SimpleAuction {
-    // Parameters of the auction. Times are either
-    // absolute unix timestamps (seconds since 1970-01-01)
-    // or time periods in seconds.
+// Open auction where everyone can see bids made
+contract SimpleOpenAuction {
     address public beneficiary;
+
+    // Times are absolute unix timestamps (seconds since 1970-01-01) or time in seconds.
     uint public auctionStart;
     uint public biddingTime;
 
@@ -12,76 +12,64 @@ contract SimpleAuction {
     address public highestBidder;
     uint public highestBid;
 
-    // Allowed withdrawals of previous bids
+    // Map bidders with their bids. Allows withdrawals of previous bids
     mapping(address => uint) pendingReturns;
 
-    // Set to true at the end, disallows any change
+    // Set to true at auction end to disallow further change
     bool ended;
 
-    // Events that will be fired on changes.
+    // Events that will be fired on changes
     event HighestBidIncreased(address bidder, uint amount);
     event AuctionEnded(address winner, uint amount);
 
-    // The following is a so-called natspec comment,
-    // recognizable by the three slashes.
-    // It will be shown when the user is asked to
-    // confirm a transaction.
+    // "natspec" comments recognisable by three slashes shown when user asked confirm transaction
 
-    /// Create a simple auction with `_biddingTime`
-    /// seconds bidding time on behalf of the
-    /// beneficiary address `_beneficiary`.
-    function SimpleAuction(
-    uint _biddingTime,
-    address _beneficiary
-    ) {
+    /// Create simple auction with `_biddingTime` seconds bidding
+    /// time on behalf of beneficiary address `_beneficiary`.
+    function SimpleOpenAuction(uint _biddingTime, address _beneficiary) {
         beneficiary = _beneficiary;
         auctionStart = now;
         biddingTime = _biddingTime;
     }
 
-    /// Bid on the auction with the value sent
-    /// together with this transaction.
-    /// The value will only be refunded if the
-    /// auction is not won.
+    /// Bid on auction with value sent together with this transaction.
+    /// The value only refunded if auction not won.
     function bid() payable {
-        // No arguments are necessary, all
-        // information is already part of
-        // the transaction. The keyword payable
-        // is required for the function to
-        // be able to receive Ether.
+        // No arguments are necessary, All info already part of transaction.
+        // Keyword "payable" is required for function to receive Ether
 
-        // Revert the call if the bidding
-        // period is over.
+        // Revert call if bidding period over
         require(now <= (auctionStart + biddingTime));
 
-        // If the bid is not higher, send the
-        // money back.
+        // Reimburse money if new bid not higher than highest bid
         require(msg.value > highestBid);
 
+        // Increase pending returns of previously highest bidder since their bid was beaten by `msg.value`
         if (highestBidder != 0) {
-            // Sending back the money by simply using
-            // highestBidder.send(highestBid) is a security risk
-            // because it can be prevented by the caller by e.g.
-            // raising the call stack to 1023. It is always safer
-            // to let the recipients withdraw their money themselves.
+            // Security Risk: Do not send back money simply using `highestBidder.send(highestBid)`
+            // as caller may reject it (i.e. by raising call stack to 1023).
+            // Safer Option: Recipients should withdraw money reimbursed to them by themselves from `pendingReturns`.
             pendingReturns[highestBidder] += highestBid;
         }
+
+        // Update records with new highest bidder
         highestBidder = msg.sender;
         highestBid = msg.value;
+
+        // Event fired since highest bid increased
         HighestBidIncreased(msg.sender, msg.value);
     }
 
-    /// Withdraw a bid that was overbid.
+    /// Withdraw a bid from an address that was beaten by another bid (overbid)
     function withdraw() returns (bool) {
         var amount = pendingReturns[msg.sender];
         if (amount > 0) {
-            // It is important to set this to zero because the recipient
-            // can call this function again as part of the receiving call
-            // before `send` returns.
+            // Important: Set this to zero since recipient can call this function
+            // again (double dipping) during receiving call before `send` returns.
             pendingReturns[msg.sender] = 0;
 
+            // Reset amount owing by restoring money to pending returns if reimbursement failed
             if (!msg.sender.send(amount)) {
-                // No need to call throw here, just reset the amount owing
                 pendingReturns[msg.sender] = amount;
                 return false;
             }
@@ -89,27 +77,28 @@ contract SimpleAuction {
         return true;
     }
 
-    /// End the auction and send the highest bid
-    /// to the beneficiary.
+    /// End auction and send highest bid to the beneficiary
     function auctionEnd() {
-        // It is a good guideline to structure functions that interact
-        // with other contracts (i.e. they call functions or send Ether)
-        // into three phases:
-        // 1. checking conditions
-        // 2. performing actions (potentially changing conditions)
-        // 3. interacting with other contracts
-        // If these phases are mixed up, the other contract could call
-        // back into the current contract and modify the state or cause
-        // effects (ether payout) to be performed multiple times.
-        // If functions called internally include interaction with external
-        // contracts, they also have to be considered interaction with
+        // Guideline to structuring functions that interact with other contracts
+        // (i.e. they call functions or send Ether) into three phases:
+        //
+        // 1. Conditions - Checking conditions
+        // 2. Effects - Performing actions (potentially changing conditions)
+        // 3. Interact with other contracts
+        //
+        // If these phases are mixed up, other contract could call back into
+        // current contract and modify the state or cause effects (Ether payout)
+        // to be performed multiple times.
+        //
+        // If functions called internally include
+        // interaction with external contracts, they must be considered an interaction with
         // external contracts.
 
-        // 1. Conditions
-        require(now >= (auctionStart + biddingTime)); // auction did not yet end
-        require(!ended); // this function has already been called
+        // 1. Conditions - (i.e. auction not yet ended, not previously called auction ended)
+        require(now >= (auctionStart + biddingTime));
+        require(!ended);
 
-        // 2. Effects
+        // 2. Effects - (i.e. update state that auction ended with highest bidder/bid)
         ended = true;
         AuctionEnded(highestBidder, highestBid);
 
