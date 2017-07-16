@@ -37,6 +37,9 @@
 * Solidity
     * Definitions
         * Contract (Solidity) - code (functions) and data (state) at address on Ethereum blockchain
+    * Syntax
+        * "natspecs" - comments are recognisable by three slashes `///`. shown when user is asked to confirm a transaction.
+        * "payable" - keyword required at start of function for function to receive Ether
 
 * Blockchain
     * Definitions
@@ -164,3 +167,5 @@
     * https://github.com/trufflesuite/truffle-contract/blob/master/dist/truffle-contract.js
     * https://github.com/trufflesuite/truffle-artifactor/blob/master/test/contracts.js
     * https://github.com/Sergeon/ethereum-cashbox
+    * https://github.com/Giveth/minime
+    * await https://github.com/OpenZeppelin/zeppelin-solidity/blob/master/test/DayLimit.js
