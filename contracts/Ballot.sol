@@ -1,9 +1,9 @@
 pragma solidity ^0.4.11;
 
-/// @title Voting with delegation
+// @title Voting with delegation
 contract Ballot {
 
-    /// Declare to represent Single Voter
+    // Declare to represent Single Voter
     struct Voter {
         uint weight; // weight accumulated by delegation
         bool voted;  // whether person already voted
@@ -11,7 +11,7 @@ contract Ballot {
         uint vote;   // index of voted proposal
     }
 
-    /// Declare to represent Single Proposal.
+    // Declare to represent Single Proposal.
     struct Proposal {
         bytes32 name;   // short name (up to 32 bytes)
         uint voteCount; // number of votes accumulated
@@ -25,17 +25,17 @@ contract Ballot {
 
     bool public initiated;
 
-    /// Declare state variable to store `Voter` struct for each possible address.
+    // Declare state variable to store `Voter` struct for each possible address.
 
     // Iterate mapping: https://forum.ethereum.org/discussion/1995/iterating-mapping-types
     mapping(address => Voter) public voters;
 
-    /// Dynamically-sized array of `Proposal` structs.
+    // Dynamically-sized array of `Proposal` structs.
     Proposal[] public proposals;
 
     /// Constructor creates new Ballot to with:
-    //  - chairperson (originator) granted voting authority by changing `weight` to `1`
-    //  - proposals (comprising list of proposalNames/candidates) each with voteCount
+    ///  - chairperson (originator) granted voting authority by changing `weight` to `1`
+    ///  - proposals (comprising list of proposalNames/candidates) each with voteCount
     function Ballot(bytes32[] proposalNames) {
         chairperson = msg.sender;
         voters[chairperson].weight = 1;
@@ -54,9 +54,9 @@ contract Ballot {
     }
 
     /// Grant Voter authority to vote on Ballot through call only from chairperson
-    //  - Grants Voter authority by changing `weight` to `1`
-    //  - Revert all changes to state and Ether balances if `require` evaluates to `false`
-    //  - WARNING: Currently `require` consumes all provided Gas
+    ///  - Grants Voter authority by changing `weight` to `1`
+    ///  - Revert all changes to state and Ether balances if `require` evaluates to `false`
+    ///  - WARNING: Currently `require` consumes all provided Gas
     function giveRightToVote(address voter) {
         // `require` - http://solidity.readthedocs.io/en/develop/control-structures.html
         require((msg.sender == chairperson) && !voters[voter].voted && (voters[voter].weight == 0));
@@ -70,8 +70,8 @@ contract Ballot {
     }
 
     /// Delegate Vote to voter with `to` address
-    //  - Delegator `sender` (reference) must not have previously voted
-    //  - Delegator must not delegate to themself (self-delegation)
+    ///  - Delegator `sender` (reference) must not have previously voted
+    ///  - Delegator must not delegate to themself (self-delegation)
     function delegate(address to) {
         // Pass by reference `voters[msg.sender]` to `sender`
         Voter sender = voters[msg.sender];
@@ -128,10 +128,10 @@ contract Ballot {
     }
 
     /// - Vote by a `Voter` from their `weight` (amount of times they may
-    //   vote, including votes delegated to them) toward a specific
-    //   `proposal` argument (`proposals[proposal].name`) associated with
-    //   a `Proposal` in the `proposals`
-    // - `sender` (Voter) must not have already voted
+    ///   vote, including votes delegated to them) toward a specific
+    ///   `proposal` argument (`proposals[proposal].name`) associated with
+    ///   a `Proposal` in the `proposals`
+    /// - `sender` (Voter) must not have already voted
     function vote(uint proposal) {
         Voter sender = voters[msg.sender];
         require(!sender.voted);
@@ -152,8 +152,8 @@ contract Ballot {
     }
 
     /// @dev Computes `winningProposal` accounting for all previous votes
-    //  - Reference:
-    //    - `constant` - https://ethereum.stackexchange.com/questions/13851/could-we-call-a-constant-function-without-spending-any-gas-inside-a-transaction/13855
+    ///  - Reference:
+    ///    - `constant`
     function winningProposal() constant returns (uint winningProposal) {
         uint winningVoteCount = 0;
         for (uint p = 0; p < proposals.length; p++) {
