@@ -1,13 +1,13 @@
 pragma solidity ^0.4.11;
 
-contract Purchase {
+contract SafeRemotePurchase {
     uint public value;
     address public seller;
     address public buyer;
     enum State { Created, Locked, Inactive }
     State public state;
 
-    function Purchase() payable {
+    function SafeRemotePurchase() payable {
         seller = msg.sender;
         value = msg.value / 2;
         require((2 * value) == msg.value);
