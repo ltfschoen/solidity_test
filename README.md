@@ -43,6 +43,7 @@
         * "modifiers" - validate inputs to functions
         * `keccak256` - Ethereum hashing function (SHA-3)
         * `internal` - can only be called from contract itself (or derived contracts)
+        * "withdraw pattern" - used in SafeRemotePurchase http://solidity.readthedocs.io/en/develop/common-patterns.html
 
 * Blockchain
     * Definitions
@@ -174,3 +175,4 @@
         * https://github.com/Sergeon/ethereum-cashbox
         * https://github.com/Giveth/minime
         * await https://github.com/OpenZeppelin/zeppelin-solidity/blob/master/test/DayLimit.js
+        * https://ethereum.stackexchange.com/questions/18135/solidity-docs-code-example-divide-by-two-then-require-multiply-quotient-by-two
