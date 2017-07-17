@@ -1,5 +1,20 @@
 pragma solidity ^0.4.11;
 
+// Blind option features:
+// - Bids commited by bidder during bidding period are only long crytographic
+//   hashes (not actual bids)
+//   - Assumed near impossible to find two bid values with equal hashes
+// - Reveal bids by bidders at end of bidding period
+//   - Bidders send unencrypted values to Contract that checks hash value matches
+//     their bid period hash
+// - ISSUE - Bidder may not send money after winning auction
+//   - OPTION - Force bidder to send money along with initial bid
+//     - ISSUE - Blinding of the value transfers is not possible (anyone can see value)
+//       - SOLUTION - Only accept bid values higher than the highest bid.
+//                    During bidding period add bids less than highest
+//                    bid (invalid) to pending refunds.
+//                    During revealing phase
+//
 contract BlindAuction {
     struct Bid {
         bytes32 blindedBid;
@@ -17,14 +32,13 @@ contract BlindAuction {
     address public highestBidder;
     uint public highestBid;
 
-    // Allowed withdrawals of previous bids
     mapping(address => uint) pendingReturns;
 
     event AuctionEnded(address winner, uint highestBid);
 
-    /// Modifiers are a convenient way to validate inputs to
-    /// functions. `onlyBefore` is applied to `bid` below:
-    /// The new function body is the modifier's body where
+    /// Modifiers conveniently validate inputs to functions.
+    /// `onlyBefore` is applied to `bid`
+    /// New function body is the modifier's body where
     /// `_` is replaced by the old function body.
     modifier onlyBefore(uint _time) { require(now < _time); _; }
     modifier onlyAfter(uint _time) { require(now > _time); _; }
@@ -40,28 +54,30 @@ contract BlindAuction {
         revealEnd = biddingEnd + _revealTime;
     }
 
-    /// Place a blinded bid with `_blindedBid` = keccak256(value,
-    /// fake, secret).
-    /// The sent ether is only refunded if the bid is correctly
-    /// revealed in the revealing phase. The bid is valid if the
-    /// ether sent together with the bid is at least "value" and
-    /// "fake" is not true. Setting "fake" to true and sending
-    /// not the exact amount are ways to hide the real bid but
-    /// still make the required deposit. The same address can
-    /// place multiple bids.
+    /// Blinded bid placed
+    /// - `_blindedBid` = keccak256(value, fake, secret).
+    /// - `payable` to receive Ether.
     function bid(bytes32 _blindedBid)
         payable
         onlyBefore(biddingEnd)
     {
         bids[msg.sender].push(Bid({
-        blindedBid: _blindedBid,
-        deposit: msg.value
+            blindedBid: _blindedBid,
+            deposit: msg.value
         }));
     }
 
-    /// Reveal your blinded bids. You will get a refund for all
-    /// correctly blinded invalid bids and for all bids except for
-    /// the totally highest.
+    /// Reveal blinded bids.
+    /// - Refund senders where blinded bid
+    ///   - Valid (not match crytographic hash or fake flag raised)
+    ///   - Original bid is greater than value in cryptographic hash
+    ///     (avoid fake senders or those that send
+    ///   - Not absolute highest bid
+    /// - Ether only refunded if bid correctly revealed in revealing phase.
+    /// - Valid bid if Ether sent with bid `bid.deposit` is at least
+    ///   bid cryptographic hash value and not fake flag raised.
+    /// - Same sender address can make multiple deposits
+    /// place multiple bids.
     function reveal(
         uint[] _values,
         bool[] _fake,
@@ -78,28 +94,30 @@ contract BlindAuction {
         uint refund;
         for (uint i = 0; i < length; i++) {
             var bid = bids[msg.sender][i];
-            var (value, fake, secret) =
-            (_values[i], _fake[i], _secret[i]);
+            var (value, fake, secret) = (_values[i], _fake[i], _secret[i]);
             if (bid.blindedBid != keccak256(value, fake, secret)) {
-                // Bid was not actually revealed.
-                // Do not refund deposit.
+                // Do not refund deposit to bid sender (incorrect) of this iteration
+                // Blinded bid failed to match cryptographic hash.
+                // Skip to next bid iteration
                 continue;
             }
+            // Increase refund by original deposit, but then reduce refund by
+            // cryptographic hash value when all the following:
+            // - If not fake
+            // - If original deposit value greater than or equal to iteration hash value
+            // - If highest bid (calling placeBid returns true)
             refund += bid.deposit;
             if (!fake && bid.deposit >= value) {
                 if (placeBid(msg.sender, value))
-                refund -= value;
+                    refund -= value;
             }
-            // Make it impossible for the sender to re-claim
-            // the same deposit.
+            // Prevent sender from reclaiming same deposit
             bid.blindedBid = 0;
         }
         msg.sender.transfer(refund);
     }
 
-    // This is an "internal" function which means that it
-    // can only be called from the contract itself (or from
-    // derived contracts).
+    // `internal` function only callable from contract itself (or derived contracts)
     function placeBid(address bidder, uint value) internal
         returns (bool success)
     {
@@ -115,18 +133,17 @@ contract BlindAuction {
         return true;
     }
 
-    /// Withdraw a bid that was overbid.
+    /// Withdraw bid that was overbid.
     function withdraw() returns (bool) {
         var amount = pendingReturns[msg.sender];
         if (amount > 0) {
-            // It is important to set this to zero because the recipient
-            // can call this function again as part of the receiving call
-            // before `send` returns (see the remark above about
-            // conditions -> effects -> interaction).
+            // Prevent recipient calling function multiple times as part of
+            // receiving call by setting `pendingReturns` to zero before `send`
+            // returns (i.e. conditions -> effects -> interaction)
             pendingReturns[msg.sender] = 0;
 
             if (!msg.sender.send(amount)){
-                // No need to call throw here, just reset the amount owing
+                // Reset amount pending to be refunded. Not need to call throw
                 pendingReturns[msg.sender] = amount;
                 return false;
             }
@@ -134,16 +151,17 @@ contract BlindAuction {
         return true;
     }
 
-    /// End the auction and send the highest bid
-    /// to the beneficiary.
+    /// End auction. Send highest bid to beneficiary.
     function auctionEnd()
         onlyAfter(revealEnd)
     {
         require(!ended);
         AuctionEnded(highestBidder, highestBid);
         ended = true;
-        // We send all the money we have, because some
-        // of the refunds might have failed.
+        // Send all money since some refunds might have failed
+
+        // `this.balance` where `this` is pointer to current contract instance of type
+        // BlindAuction derived from Address
         beneficiary.transfer(this.balance);
     }
 }

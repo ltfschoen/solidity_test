@@ -39,7 +39,10 @@
         * Contract (Solidity) - code (functions) and data (state) at address on Ethereum blockchain
     * Syntax
         * "natspecs" - comments are recognisable by three slashes `///`. shown when user is asked to confirm a transaction.
-        * "payable" - keyword required at start of function for function to receive Ether
+        * `payable` - keyword required at start of function for function to receive Ether
+        * "modifiers" - validate inputs to functions
+        * `keccak256` - Ethereum hashing function (SHA-3)
+        * `internal` - can only be called from contract itself (or derived contracts)
 
 * Blockchain
     * Definitions
