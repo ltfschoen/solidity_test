@@ -2,6 +2,7 @@ const SimpleStorage = artifacts.require("./SimpleStorage.sol");
 const SubCurrency = artifacts.require("./SubCurrency.sol");
 const Ballot = artifacts.require("./Ballot.sol");
 const SimpleOpenAuction = artifacts.require("./SimpleOpenAuction.sol");
+const BlindAuction = artifacts.require("./BlindAuction.sol");
 
 // http://truffle.readthedocs.io/en/beta/getting_started/migrations/
 module.exports = function(deployer) {
@@ -9,4 +10,5 @@ module.exports = function(deployer) {
   deployer.deploy(SubCurrency);
   deployer.deploy(Ballot);
   deployer.deploy(SimpleOpenAuction);
+  deployer.deploy(BlindAuction);
 };
