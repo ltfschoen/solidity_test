@@ -156,6 +156,67 @@
                 * Ethereum Clients - may prune old contracts
                 * External Accounts cannot be removed currently from state
 
+* Micropayment Channels
+    * About
+        * Scalability option for Ethereum in future
+        * Trustless channels
+        * Ethereum payment "channels" scalable (without malleability issues encountered with Bitcoin)
+        * Complex setups may be used to link and enable multi-party channels (i.e. using Raiden)
+    * Example
+        * Given User A and User B want setup micropayment channel.
+        * Users do not want to commit on blockchain to save on transaction fees.
+        * User A wants to pay User B to manage their social media presence writing blogs.
+        * User A wants to pays 0.001 Ether per blog
+        * ISSUE - Gas Fees
+            * If User A made on-chain (blockchain) transactions for each blog
+              then 20% of User B's income would be deducted by Gas fees
+        * ISSUE - Deferred Payment vs Micropayment Trade-off
+            * User B not trust User A will pay at end for 100 blog posts
+            * User A not want pay User B lump sum upfront in case no work done
+            * SOLUTION
+                * Payment Channel - User A pays 100 * 0.001 == 0.1 Ether
+                  to a "channel" smart contract when its created
+                  where money may only be sent back to User A or to User B.
+                    * User A sets a "channel" timeout to be Work Due Date.
+                    * User A may Cancel and refund payment
+                    * "channel" funds are Locked
+                    * User B starts Work on 100 blog posts.
+                    * User A off-chain signs a Hash (contract_address, value) of
+                    (<user_b_addr>, 0.001) using the "channel" private key
+                    and sends it to User B for each 1 blog post completed.
+                    * User B also off-chain signs Hash (i.e. executed agreement)
+                    but does not sent to blockchain
+                    * User B when received sufficient off-chain payments
+                    and not want work anymore off-chain may submit the
+                    multi-signed (signed by both User A and User B) message
+                    to close the "channel" smart contract so it sends agreed value to
+                    User B blockchain address and remaining back to User A.
+                    * Mitigates risk of User B being malicious and trying to
+                    extort payment from User A by not doing any work after User A has Locked
+                    the payment in the "channel" smart contract
+                    (i.e. User B only willing to sign multi-sign for 50%
+                    payment but for no work) since User A is protected by "channel"
+                    timeout and simply waits until Work Due Date and calls "channel"
+                    timeout to destroy the contract and return remaining funds to User A.
+                    * Benefits
+                        * User B only at risk of not being paid for 1x blog post
+                        (0.001 Ether)
+                        * User A not at risk like with non-"channel" payment
+                        * Both users save in transaction fees
+
+    * TODO - Micropayments
+        * https://21.co/learn/intro-to-micropayment-channels/#how-micropayment-channels-work-an-analogy
+        * https://blog.ethereum.org/2014/09/17/scalability-part-1-building-top/
+        * https://www.reddit.com/r/ethereum/comments/422zxb/micropayments/
+        * http://www.blunderingcode.com/a-lightning-network-in-two-pages-of-solidity/
+        * https://www.reddit.com/r/ethereum/comments/6fde8t/ethereum_payment_channels_in_50_lines_of_solidity/
+
+* Links
+    * Raiden
+* References:
+    * https://medium.com/@matthewdif/ethereum-payment-channel-in-50-lines-of-code-a94fad2704bc
+    * https://github.com/mattdf/payment-channel/
+
 
 * Other
     * Definitions
