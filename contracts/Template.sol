@@ -90,7 +90,13 @@ contract Template {
         uint vote;
     }
 
+    // Address - Ethereum address 20 byte value serves as base for contract
+    // - Members include:
+    //   - `balance` - property to query balance of address
+    //   - `transfer` - property to send Ether (Wei units) to address
     address public seller;
+    address x = 0x123;
+    address myAddress = this;
 
     // State variables - values permanently stored in contract storage
     uint storedData;
@@ -113,6 +119,8 @@ contract Template {
     }
 
     /// Functions
+    /// - Static Typing - Solidity is statically typed language so type of
+    ///   each variable (state and local) must be known at compile-time
     function bid()
         payable
         returns (bool highestBidIncreasedSuccess)
@@ -121,6 +129,21 @@ contract Template {
         HighestBidIncreased(msg.sender, msg.value);
 
         return true;
+    }
+
+    function sendMoney(address sender, uint value)
+        internal
+        returns (bool success)
+    {
+        if (x.balance < 10 && myAddress.balance >= 10)
+            x.transfer(10);
+            return true;
+        return false;
+    }
+
+    function send()
+    {
+
     }
 
     /**@dev Function Template smart contract algorithm.
@@ -136,4 +159,34 @@ contract Template {
         r1 = p1 + p2;
         r2 = p1 * p2;
     }
+
+    /// Value Types
+    /// - Passed by Value types of variables
+    ///   (copied when used as function arguments or for assignments)
+    function playWithValueTypes()
+    {
+        // Value Types
+        bool myBool = true || false;
+
+        // Logic
+        bool myLogic1 = ((!true || false) && true) == (false || true);
+
+        // Logic - Short-Circuit Rule
+        bool myLogicShortCircuit = t() || f();
+
+        // Integers
+        int i1 = -1; // Signed integer (alias for `int256`)
+        uint ui1 = 1; // Unsigned integer (alias for `uint256`)
+        uint8 kw8 = 8; // Unsigned of 8 up to 256 (i.e. `uint256`)
+
+        // Operators
+        bool comp = (1 <= 1) == (1 < 2); // Comparisons
+        // TODO - Bit operators - http://solidity.readthedocs.io/en/develop/types.html
+        // TODO - Arithmetic operators - http://solidity.readthedocs.io/en/develop/types.html
+        // - Note: Division truncates unless both operators are literals
+        // - Note: Division by zero and modulus zero throws runtime exception
+    }
+
+    function t() returns (bool) { return true; }
+    function f() returns (bool) { return false; }
 }
