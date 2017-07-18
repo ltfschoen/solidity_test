@@ -7,7 +7,8 @@
 //   - not exact version so bugfix releases possible
 pragma solidity ^0.4.11;
 
-// Move into separate file
+// Library
+// TODO - Move into separate file
 library MyLib
 {
     uint public constant symbolName1 = 1;
@@ -73,13 +74,65 @@ symbolName2
 
 /** @title <enter_contract_title_here>. */
 contract Template {
-    /**@dev Template smart contract algorithm.
+
+    // Enum - create custom types with finite set of values
+    enum State {
+        Created,
+        Locked,
+        Inactive
+    }
+
+    // Struct declaration - create custom type definitions to group variables
+    struct Voter {
+        uint weight;
+        bool voted;
+        address delegate;
+        uint vote;
+    }
+
+    address public seller;
+
+    // State variables - values permanently stored in contract storage
+    uint storedData;
+
+    // Event declaration
+    event HighestBidIncreased(address bidder, uint amount);
+
+    // Modifier declaration
+    modifier onlySeller() {
+        require(msg.sender == seller);
+        _;
+    }
+
+    /// Modifier implementation
+    function abort()
+        onlySeller
+        returns (bool abortedSuccess)
+    {
+        return true;
+    }
+
+    /// Functions
+    function bid()
+        payable
+        returns (bool highestBidIncreasedSuccess)
+    {
+        // Event triggering
+        HighestBidIncreased(msg.sender, msg.value);
+
+        return true;
+    }
+
+    /**@dev Function Template smart contract algorithm.
      * @param p1 Parameter 1.
      * @param p2 Parameter 2.
      * @return r1 Calculation 1.
      * @return r2 Calculation 2.
+     * Executable unit of code within contract
      */
-    function rectangle(uint p1, uint p2) returns (uint r1, uint r2) {
+    function rectangle(uint p1, uint p2)
+        returns (uint r1, uint r2)
+    {
         r1 = p1 + p2;
         r2 = p1 * p2;
     }
