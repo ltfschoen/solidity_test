@@ -50,6 +50,7 @@ contract("Ballot" , function(accounts){
 
     before(function(done){
 
+      // Note: `new` contracts equals EVM `CREATE` instruction
       Ballot.new(["hard fork" , "soft fork" , "do nothing"])
         .then(function(contract){
           console.log("New instance address: ", contract.address);

@@ -228,6 +228,7 @@
 
 * TODO
     * [ ] - Add Tests to Simple Open Auction
+    * [ ] - Read Writing Robust Smart Contracts https://blog.colony.io/writing-more-robust-smart-contracts-99ad0a11e948
     * [ ] Links
         * http://solidity.readthedocs.io/en/develop/solidity-by-example.html#blind-auction
         * https://truffle-box.github.io/

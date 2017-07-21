@@ -95,8 +95,8 @@ contract Template {
     //   - `balance` - property to query balance of address
     //   - `transfer` - property to send Ether (Wei units) to address
     address public seller;
-    address x = 0x123;
     address myAddress = this;
+    address contractAddress = 0x123;
 
     // State variables - values permanently stored in contract storage
     uint storedData;
@@ -135,15 +135,52 @@ contract Template {
         internal
         returns (bool success)
     {
-        if (x.balance < 10 && myAddress.balance >= 10)
-            x.transfer(10);
+        // Transfer money from `myAddress` to `contractAddress`
+        // - Note: All contracts inherit address members.
+        //   Query current contract balance with `this.balance`.
+        // - `<address>.balance` queries balance of address
+        // - `<address>.transfer` transfers Ether (Wei) to address
+        //   - Calls fallback function if recipient is contract address.
+        //     Transfer of Ether reverted and exception raised by
+        //     current contract (sender) if execution runs out of Gas or fails.
+        // - `<address>.send` returns false but not trigger exception upon failure.
+        //   - Danger:
+        //      - Fails transfer if call stack depth 1024 (forcible by caller)
+        //      - Fails if recipient runs out of Gas
+        // - Best Practice:
+        //   - Safely transfer Ether by always checking `send` return value is true
+        //     or use `transfer` instead. Alternatively use pattern where
+        //     recipient withdraws money instead of it being sent to them.
+        //   - Danger: Unknown contracts may be malicious when called. Beware of
+        //     control being handed over allowing subsequent calls into current contract
+        //     that may change state variables.
+        // Advanced:
+        // - Note: Use following Low-Level functions as last resort since break Solidity type-safety.
+        //   - `<address>.gas() option available
+        // - `<address>.call` used to interface with contract addresses that
+        //   do not adhere to Application Binary Interface (ABI).
+        //   `call` takes arguments that are padded to 32 bytes and concatenated
+        //   (except when first argument encoded to 4 bytes to allow use function signatures)
+        //   `call` returns:
+        //      - true - if invoked function terminated
+        //      - false - if EVM exception raised
+        //   `call` does not allow accessing actual data returned
+        // - `<address>.delegateCall` differs from `call` since only code
+        //   (i.e. fallback function) of given address is used, but take from
+        //   current `msg.sender` contract other information (balance, storage, etc).
+        //   `delegateCall` uses Library code stored in other contract.
+        //   `delegateCall` requires ensure storage layout of both current
+        //   `msg.sender` and other contract is suitable for usage of `deletageCall`.
+        //   `<address>.value() option NOT supported for `delegateCall`.
+
+        // TODO - understand purpose of `call`
+        contractAddress.call("register", "MyName");
+        contractAddress.call(bytes4(keccak256("fun(uint256)")), a);
+
+        if (contractAddress.balance < 10 && myAddress.balance >= 10)
+            contractAddress.transfer(10);
             return true;
         return false;
-    }
-
-    function send()
-    {
-
     }
 
     /**@dev Function Template smart contract algorithm.
@@ -185,6 +222,35 @@ contract Template {
         // TODO - Arithmetic operators - http://solidity.readthedocs.io/en/develop/types.html
         // - Note: Division truncates unless both operators are literals
         // - Note: Division by zero and modulus zero throws runtime exception
+
+        // Byte Arrays (Fixed-size)
+        // - Contracts cannot read strings returned by another contract
+        // - EVM has word-size of 32 bytes (optimised to deal with data in chunks of 32 bytes)
+        // - Solidity compiler generates more bytecode and does more work with high Gas cost
+        //   when data is not in 32 byte chunks that fit in the EVMs word-size.
+        // - Strings are in `bytes` and are dynamically sized type
+        // - `<bytes32_array>.length` returns fixed length of byte array
+        bytes mystring = "dsa";
+        bytes32 mybytes = bytes32(mystring);
+
+        // Byte Arrays (Dynamically-sized)
+        // - `bytes` - use for dynamically-sized raw byte data array
+        // - `string` dynamically-sized UTF-8-encoded string
+        // - Note: Always bytes1 to bytes32 since much cheaper Gas-wise.
+
+        // Inline Assembly
+        // - `mload` reads memory into a register
+        // - `mstore` writes memory into a register
+        // - String or `bytes` have first 256 bit for length of data
+        // - `bytes32` is fixed
+        // - Note: Comparing strings stored in a contract with strings from another
+        //   contract is difficult since cannot pass strings between them. Solution is
+        //   to convert strings to `bytes32` and then change some
+        //   characters within these strings (or bytes32) as a result of the comparisons
+        //   by using mload from `mystring` with a 32 byte offset and then using
+        //   `mstore` to write directly to `mybytes`.
+        //   Reference: https://gist.github.com/axic/ce82bdd1763c04ef8138c2b905985dab
+
     }
 
     function t() returns (bool) { return true; }
