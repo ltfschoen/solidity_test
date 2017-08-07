@@ -82,6 +82,32 @@ contract Template {
         Inactive
     }
 
+    enum ActionChoices {
+        VoteLeft,
+        VoteRight,
+        NoVote
+    }
+
+    ActionChoices choice;
+    ActionChoices constant defaultChoice = ActionChoices.NoVote;
+
+    function setNoVote() {
+        choice = ActionChoices.NoVote;
+    }
+
+    // Enum types not part of ABI, so signature of "getChoice"
+    // automatically changes to "getChoice() returns (uint8)"
+    // for all matters external to Solidity. Integer type used will be just
+    // large enough to hold all enum values, i.e. if we use larger values,
+    // `uint16` will be used instead of `uint8` and so on.
+    function getChoice() returns (ActionChoices) {
+        return choice;
+    }
+
+    function getDefaultChoice() returns (uint) {
+        return uint(defaultChoice);
+    }
+
     // Struct declaration - create custom type definitions to group variables
     struct Voter {
         uint weight;
