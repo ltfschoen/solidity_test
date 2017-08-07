@@ -32,6 +32,8 @@ symbolName1 as alias, // Create new global symbol `alias` referencing `symbol1`
 symbolName2
 } from "./Template.sol";
 
+import "./lib/ArrayUtils.sol";
+
 // Compiler Mappings and Command-Line Compiler `solc`
 // - Specific path prefex Re-mapping. Fall-back Re-mapping with longest key first
 //   - Re-maps "github.com/abc/lib" to "/usr/local/lib" for compiler to read file
@@ -157,6 +159,24 @@ contract Template {
         return true;
     }
 
+    /*
+     * Declaring External Function Types
+     * - Internal `internal` functions usage inside current contract context (code unit) only.
+     *   Default is that function types are `internal` so the keyword may be omited.
+     *   - Example: lib/ArrayUtils.sol
+     * - External functions have an address and function signature and may be passed
+     *   via and returned from external function calls.
+     *   - Example: lib/Oracle.sol
+     *
+     * Calling Function Types
+     * - Internal Solidity Context
+     *   - Call for Internal form public functions of current contract with `f`
+     *   - Call for External form public functions of current contract with `this.f`
+     * - External Solidity Context
+     *   - Treated as `function` type that encodes: address, function identifier, and single `bytes24` type
+     *
+     * - Reference: https://solidity.readthedocs.io/en/develop/types.html
+     */
     function sendMoney(address sender, uint value)
         internal
         returns (bool success)
