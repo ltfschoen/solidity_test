@@ -16,6 +16,7 @@
     * Step 3: Compile, Migrate: `truffle compile --compile-all; truffle migrate --reset --network development;`
     * Step 4: Tests: `truffle test` or `npm run test`
         * **IMPORTANT** - Ensure already launched TestRPC by running previous steps
+    * Note: Contracts in the ./examples folder are for reference purposes only and not compiled
 
 * Debugging
     * Remix IDE Documentation - https://remix.readthedocs.io/en/latest/
@@ -229,6 +230,7 @@
 * TODO
     * [ ] - Add Tests to Simple Open Auction
     * [ ] - Read Writing Robust Smart Contracts https://blog.colony.io/writing-more-robust-smart-contracts-99ad0a11e948
+    * [ ] - Pet Shop Dapp http://truffleframework.com/tutorials/pet-shop
     * [ ] Links
         * http://solidity.readthedocs.io/en/develop/solidity-by-example.html#blind-auction
         * https://truffle-box.github.io/

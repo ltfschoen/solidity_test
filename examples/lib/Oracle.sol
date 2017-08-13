@@ -1,5 +1,6 @@
 pragma solidity ^0.4.11;
 
+// Reference: https://solidity.readthedocs.io/en/develop/types.html
 contract Oracle {
 
     struct Request {
@@ -31,8 +32,12 @@ contract OracleUser {
     }
 
     // function oracleResponse(bytes response) {
-    function oracleResponse(bytes response) {
+    // Reference: https://ethereum.stackexchange.com/questions/11246/convert-struct-to-bytes-in-solidity
+    function oracleResponse(bytes response) returns (bytes memory) {
         require(msg.sender == address(oracle));
         // Use the data
+        uint _size = bytes(response).length;
+        bytes memory _data = new bytes(_size);
+        return _data;
     }
 }
