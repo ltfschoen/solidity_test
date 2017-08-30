@@ -45,7 +45,21 @@
         * `keccak256` - Ethereum hashing function (SHA-3)
         * `internal` - can only be called from contract itself (or derived contracts)
         * "withdraw pattern" - used in SafeRemotePurchase http://solidity.readthedocs.io/en/develop/common-patterns.html
-
+    * Types
+        * Reference Types
+            * Link https://solidity.readthedocs.io/en/develop/types.html
+            * Data Storage
+                * Copying complex types (i.e. Arrays, Structs that are >256 bits) is expensive.
+                Storage decision is required and the complex type is annotated with its
+                **data location** as either:
+                    * `memory` (not persisting) - i.e. default for function parameters
+                    * `storage` (state variables) - i.e. default for local variables
+                    * `callData` (immutable, non-persistent, behaves like memory) - i.e. storage of function arguments and external functions
+            * Assignments
+                * Assignments to `storage`, `memory`, or state variable creates independent copy
+                * Assignments local storage variable only assigns a reference (pointing to state variable)
+                * Assignments to memory stored reference type from the same type does not create a copy
+            * Refer to `ComplexDataStorage.sol`
 * Blockchain
     * Definitions
         * Blockchain -

@@ -5,6 +5,7 @@ const SimpleOpenAuction = artifacts.require("./SimpleOpenAuction.sol");
 const BlindAuction = artifacts.require("./BlindAuction.sol");
 const SafeRemotePurchase = artifacts.require("./SafeRemotePurchase.sol");
 const MicropaymentChannel = artifacts.require("./MicropaymentChannel.sol");
+const ComplexDataStorage = artifacts.require("./ComplexDataStorage.sol");
 const Template = artifacts.require("./Template.sol");
 
 // http://truffle.readthedocs.io/en/beta/getting_started/migrations/
@@ -17,4 +18,5 @@ module.exports = function(deployer) {
   deployer.deploy(SafeRemotePurchase);
   deployer.deploy(MicropaymentChannel);
   deployer.deploy(Template);
+  deployer.deploy(ComplexDataStorage);
 };
