@@ -7,6 +7,7 @@ const SafeRemotePurchase = artifacts.require("./SafeRemotePurchase.sol");
 const MicropaymentChannel = artifacts.require("./MicropaymentChannel.sol");
 const ComplexDataStorage = artifacts.require("./ComplexDataStorage.sol");
 const ArrayContract = artifacts.require("./ArrayContract.sol");
+const CrowdFunding = artifacts.require("./CrowdFunding.sol");
 const Template = artifacts.require("./Template.sol");
 
 // http://truffle.readthedocs.io/en/beta/getting_started/migrations/
@@ -21,4 +22,5 @@ module.exports = function(deployer) {
   deployer.deploy(Template);
   deployer.deploy(ComplexDataStorage);
   deployer.deploy(ArrayContract);
+  deployer.deploy(CrowdFunding);
 };
