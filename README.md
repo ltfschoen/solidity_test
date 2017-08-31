@@ -48,6 +48,7 @@
     * Types
         * Reference Types
             * Link https://solidity.readthedocs.io/en/develop/types.html
+            * Ethereum Contract ABI Types https://github.com/ethereum/wiki/wiki/Ethereum-Contract-ABI
             * Data Storage
                 * Copying complex types (i.e. Arrays, Structs that are >256 bits) is expensive.
                 Storage decision is required and the complex type is annotated with its
@@ -60,6 +61,11 @@
                 * Assignments local storage variable only assigns a reference (pointing to state variable)
                 * Assignments to memory stored reference type from the same type does not create a copy
             * Refer to `ComplexDataStorage.sol`
+        * Arrays https://solidity.readthedocs.io/en/develop/types.html
+            * Fixed array size i.e. array of fixed size k and element type T `T[k]`
+            * Dynamic array size i.e. array of dynamic size `T[]`
+            * Nested arrays i.e. array of 5x dynamicterminal arrays of uint type `uint[][5]`
+
 * Blockchain
     * Definitions
         * Blockchain -

@@ -4,7 +4,20 @@ pragma solidity ^0.4.0;
 contract ComplexDataStorage {
     uint[] x; // Data Location of local variable is "storage"
 
-    function f(uint[] memoryArray) { // Data Location of memoryArray function parameter is "memory"
+    function e(uint len) {
+        // Allocate Memory Array of variable length not resizable
+        // - Length a.length == 7
+        // - Length b.length == len
+        uint[] memory a = new uint[](7);
+        bytes memory b = new bytes(len);
+        a[6] = 8; // Modify last element of a
+        f([uint(1), 2, 3, 4, 5, 6, 7, 8]); // Array Literal / Inline Array in "memory"
+
+        // Type error since uint[3] fixed size "memory" cannot be converted to dynamic-sized uint[] "memory" arrays
+        // uint[] x = [uint(1), 3, 4];
+    }
+
+    function f(uint[8] memoryArray) { // Data Location of memoryArray function parameter is "memory"
         x = memoryArray; // Copy array to "storage"
         var y = x; // Assign pointer to "storage"
         y[7];
