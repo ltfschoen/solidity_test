@@ -65,6 +65,15 @@
             * Fixed array size i.e. array of fixed size k and element type T `T[k]`
             * Dynamic array size i.e. array of dynamic size `T[]`
             * Nested arrays i.e. array of 5x dynamicterminal arrays of uint type `uint[][5]`
+        * Mappings
+            * Hash Tables (i.e. `mapping(_KeyType => _ValueType).` virtually initialised where
+            each key is mapped to a value (default value is byte-representation of all zeros).
+                * Key data not stored in mapping. Only the `keccak256` hash is used to lookup the Value
+            * Only used for state variables (or as "storage" reference types in internal functions)
+            * Getter methods are generated when Mappings maked as "public" and accept `_KeyType` and return
+            associated `_ValueType` (which may also be a Mapping)
+    * Libraries
+        * [Reentry Protection](https://github.com/SydEthereum/meetup-token/issues/1)
 
 * Blockchain
     * Definitions

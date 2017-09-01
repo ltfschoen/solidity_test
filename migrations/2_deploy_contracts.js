@@ -9,6 +9,8 @@ const ComplexDataStorage = artifacts.require("./ComplexDataStorage.sol");
 const ArrayContract = artifacts.require("./ArrayContract.sol");
 const CrowdFunding = artifacts.require("./CrowdFunding.sol");
 const Template = artifacts.require("./Template.sol");
+const MappingUserBalances = artifacts.require("./MappingUserBalances.sol");
+const TransferableMeetupToken = artifacts.require("./TransferableMeetupToken.sol");
 
 // http://truffle.readthedocs.io/en/beta/getting_started/migrations/
 module.exports = function(deployer) {
@@ -23,4 +25,6 @@ module.exports = function(deployer) {
   deployer.deploy(ComplexDataStorage);
   deployer.deploy(ArrayContract);
   deployer.deploy(CrowdFunding);
+  deployer.deploy(MappingUserBalances);
+  deployer.deploy(TransferableMeetupToken);
 };
