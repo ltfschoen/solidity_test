@@ -72,6 +72,12 @@
             * Only used for state variables (or as "storage" reference types in internal functions)
             * Getter methods are generated when Mappings maked as "public" and accept `_KeyType` and return
             associated `_ValueType` (which may also be a Mapping)
+    * [LValues](https://solidity.readthedocs.io/en/develop/types.html#operators-involving-lvalues)
+        * Shorthands `a += 1`
+        * Delete assigns initial value for the type (i.e. `delete a` is same as `a = 0` for `a` of integer type)
+    * [Implicit Conversions](https://solidity.readthedocs.io/en/develop/types.html#implicit-conversions)
+        * Any type that can be converted to `uint160` can also be converted to `address`
+        * `var` is not possible for function parameters or return parameters
     * Libraries
         * [Reentry Protection](https://github.com/SydEthereum/meetup-token/issues/1)
 

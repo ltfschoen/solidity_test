@@ -1,17 +1,19 @@
-pragma solidity ^0.4.0;
+pragma solidity ^0.4.11;
 
-contract DeleteExample {
-    uint data;
-    uint[] dataArray;
+contract DeleteBalances {
+    uint balance;
+    uint[] balancesArray;
 
     function f() {
-        uint x = data;
-        delete x; // sets x to 0, does not affect data
-        delete data; // sets data to 0, does not affect x which still holds a copy
-        uint[] y = dataArray;
-        delete dataArray; // this sets dataArray.length to zero, but as uint[] is a complex object, also
-        // y is affected which is an alias to the storage object
-        // On the other hand: "delete y" is not valid, as assignments to local variables
-        // referencing storage objects can only be made from existing storage objects.
+        uint x = balance;
+        delete x; // Sets x to 0, does not affect balance
+        delete balance; // Sets balance to 0. No effect on x that still holds a copy
+        uint[] y = balancesArray;
+        // Note:
+        //   - uint[] is a complex object
+        //   - y is effected by `delete balancesArray` since `y` is an alias to the `balancesArray` object in "storage"
+        //   - `delete y` is not valid since it assigns to local variables
+        //   - References to "storage" objects may only be made from existing "storage" objects
+        delete balancesArray; // Sets balancesArray.length to zero
     }
 }

@@ -11,6 +11,7 @@ const CrowdFunding = artifacts.require("./CrowdFunding.sol");
 const Template = artifacts.require("./Template.sol");
 const MappingUserBalances = artifacts.require("./MappingUserBalances.sol");
 const TransferableMeetupToken = artifacts.require("./TransferableMeetupToken.sol");
+const DeleteBalances = artifacts.require("./DeleteBalances.sol");
 
 // http://truffle.readthedocs.io/en/beta/getting_started/migrations/
 module.exports = function(deployer) {
@@ -27,4 +28,5 @@ module.exports = function(deployer) {
   deployer.deploy(CrowdFunding);
   deployer.deploy(MappingUserBalances);
   deployer.deploy(TransferableMeetupToken);
+  deployer.deploy(DeleteBalances);
 };
