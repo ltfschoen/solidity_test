@@ -263,6 +263,7 @@
     * https://forum.ethereum.org/
 
 * TODO
+    * [ ] - Upgrade to Truffle 4.0 beta with CLI and [integrated Solidity debugger](https://github.com/trufflesuite/truffle/releases/tag/v4.0.0-beta.0)
     * [ ] - Add Tests to Simple Open Auction
     * [ ] - Read Writing Robust Smart Contracts https://blog.colony.io/writing-more-robust-smart-contracts-99ad0a11e948
     * [ ] - Pet Shop Dapp http://truffleframework.com/tutorials/pet-shop
